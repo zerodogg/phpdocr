@@ -31,8 +31,12 @@ $includeUserNotes = false
 
 # Fetch a URL and return its contents
 def getURL (url)
-	www = WWW::Mechanize.new
-	return www.get(url).body
+	begin
+		www = WWW::Mechanize.new
+		return www.get(url).body
+	rescue
+		return ''
+	end
 end
 
 # Purpose: Check for a file in path
@@ -67,12 +71,79 @@ def prettifier (path)
 	exit(1)
 end
 
+# Purpose: Parse an index list
+def parseIndexList (list)
+	result = ''
+
+	rmlastA = false
+	first = true
+
+	list.split(/</).each do |line|
+		if line =~ /^a href="\w/
+			currlink = String.new(line)
+			currlink.sub!(/^a href="/,'')
+			currlink.sub!(/".*$/,'')
+			currlink.sub!(/\.php$/,'')
+			currlink.sub!(/^function/,'')
+			line.sub!(/^[^>]+>/,'')
+			line = String.new('[Link: '+currlink+'] '+line)
+			rmlastA = true
+		elsif line =~ /\/a>/ and rmlastA
+			line.sub!(/^\/a>/,'')
+			rmlastA = false
+		elsif first
+			first = false
+		else
+			line = '<'+line
+		end
+		result.concat(line)
+	end
+	return result
+end
+
+# Purpose: Attempt to fetch suggestions
+def fetchSuggestions (data)
+	final =  []
+	hadStart = false
+	no = 0
+	data.split(/\n/).each do |line|
+		if line =~ /result list start/
+			hadStart = true
+		elsif hadStart == false
+			next
+		elsif line =~ /result list end/
+			break
+		else
+			no += 1
+			line.gsub!(/<[^>]+>/,'')
+			if line =~ /\S/
+				final.push(line)
+			end
+		end
+	end
+	if hadStart && final != nil
+		return final
+	else
+		return nil
+	end
+end
+
 # Purpose: Look up something
-def lookup (name)
-	url = 'http://php.net/manual-lookup.php?pattern='+name
+def lookup (name, fetchPattern = true, prevSearch = nil)
+	if fetchPattern == true
+		url = 'http://php.net/manual-lookup.php?pattern='+name
+	else
+		exactName = String.new(name)
+		if ! exactName =~ /\.php$/
+			exactName.concat('.php')
+		end
+		url = 'http://php.net/manual/en/'+exactName+'.php'
+	end
 	data = getURL(url)
 	hadFirst = false
+	hadUDM = false
 	result = ''
+	indexResult = ''
 	data.split(/\n/).each do |line|
 		if hadFirst
 			if ! $includeUserNotes && line =~ /User Contributed Notes/
@@ -82,11 +153,41 @@ def lookup (name)
 		elsif line =~ /ect1/
 			hadFirst = true
 		end
+		if hadUDM
+			if line =~ /<h1 class="title">/
+				indexResult = String.new(line)
+			else
+				indexResult.concat(line)
+			end
+		elsif line =~ /UdmComment/
+			hadUDM = true
+		end
 	end
 
 	if ! hadFirst
-		puts 'Could not find '+name+' in PHP documentation'
-		return
+		if hadUDM
+			result = parseIndexList(indexResult)
+		else
+			if fetchPattern
+				lookup(name,false,data)
+			else
+				puts
+				puts 'Could not find '+name+' in PHP documentation'
+				if prevSearch != nil
+					suggest = fetchSuggestions(prevSearch)
+					if suggest != nil
+						puts "\n"
+						puts "Perhaps you were looking for one of these?"
+						while suggest.length > 0
+							printf("%-20s %-20s %-20s %-20s\n",suggest[0],suggest[1],suggest[2],suggest[3])
+							4.times { suggest.shift }
+						end
+						puts suggest
+					end
+				end
+			end
+			return
+		end
 	end
 
 	tmp = Tempfile.new('phpdocr')
