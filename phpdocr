@@ -51,20 +51,24 @@ end
 
 # Purpose: Detect and run a prettifier
 def prettifier (path)
+	# Links family, all use the same syntax
 	[ 'elinks', 'links2', 'links' ].each do |links|
 		if inPath(links)
 			return [ links,'-force-html','-dump',path ]
 		end
 	end
 
+	# html2text
 	if inPath('html2text')
 		return ['html2text','-style','pretty',path ]
 	end
 
+	# Finally, try lynx
 	if inPath('lynx')
 		return ['lynx','-dump','-force_html',path ]
 	end
 
+	# If we found none, then give up
 	puts
 	puts "Failed to locate any HTML parser. Please install one of the following,"
 	puts "and then re-run phpdocr: elinks, links2, links, html2text, lynx"
@@ -81,14 +85,21 @@ def convertLinks (list)
 	list.split(/</).each do |line|
 		if line =~ /^a href="\w/
 			currlink = String.new(line)
+			# Remove the href
 			currlink.sub!(/^a href="/,'')
+			# Remove whatever is after the href
 			currlink.sub!(/".*$/,'')
+			# Remove '#' links
 			currlink.sub!(/#.*$/,'')
+			# Parse away .php and function declarations
 			currlink.sub!(/\.php$/,'')
 			currlink.sub!(/^function\./,'')
+			# Remove other HTML
 			line.sub!(/^[^>]+>/,'')
+			# Add new content
 			line = String.new('['+currlink+'] '+line)
 			rmlastA = true
+		# Remove the a> if rmlastA is true
 		elsif line =~ /\/a>/ and rmlastA
 			line.sub!(/^\/a>/,'')
 			rmlastA = false
@@ -116,6 +127,7 @@ def fetchSuggestions (data)
 			break
 		else
 			no += 1
+			# Kill all HTML
 			line.gsub!(/<[^>]+>/,'')
 			if line =~ /\S/
 				final.push(line)
@@ -131,20 +143,28 @@ end
 
 # Purpose: Look up something
 def lookup (name, fetchPattern = true, prevSearch = nil)
+	# fetchPattern means we should run a serach
 	if fetchPattern == true
 		url = 'http://php.net/manual-lookup.php?pattern='+name
 	else
+		# Otherwise, attempt a direct page
 		exactName = String.new(name)
 		if ! exactName =~ /\.php$/
 			exactName.concat('.php')
 		end
 		url = 'http://php.net/manual/en/'+exactName+'.php'
 	end
+	# Retrieve data
 	data = getURL(url)
+	# True if this is within the normally returned page
 	hadFirst = false
+	# True if we have had the UDM statement
 	hadUDM = false
+	# The result on normal pages
 	result = ''
+	# The result on index-like pages
 	indexResult = ''
+	# Parse it
 	data.split(/\n/).each do |line|
 		if hadFirst
 			if ! $includeUserNotes && line =~ /User Contributed Notes/
@@ -165,14 +185,19 @@ def lookup (name, fetchPattern = true, prevSearch = nil)
 		end
 	end
 
+	# If we got no useful data, try again if possible, else output failure
 	if ! hadFirst && ! hadUDM
+		# If this was a fetchPattern run, try a direct one
 		if fetchPattern
 			lookup(name,false,data)
 		else
+			# This was a direct one, output errors
 			puts
 			puts 'Could not find '+name+' in PHP documentation'
+			# If we have a previous search value, attempt to fetch suggestions from it
 			if prevSearch != nil
 				suggest = fetchSuggestions(prevSearch)
+				# If we have suggestions, output them.
 				if suggest != nil
 					puts "\n"
 					puts "Perhaps you were looking for one of these?"
@@ -180,36 +205,44 @@ def lookup (name, fetchPattern = true, prevSearch = nil)
 						printf("%-20s %-20s %-20s %-20s\n",suggest[0],suggest[1],suggest[2],suggest[3])
 						4.times { suggest.shift }
 					end
-					puts suggest
 				end
 			end
 		end
 		return
 	end
 
+	# If we 'hadFirst', then result contains what we want, otherwise use
+	# indexResult
 	if hadFirst
 		result = convertLinks(result)
 	else
 		result = convertLinks(indexResult)
 	end
 
+	# Write the data to a temporary file so the prettifier can
+	# read it there (not all of them support reading from STDIN)
 	tmp = Tempfile.new('phpdocr')
 	tmp.puts('<html><body>'+result+'</body></html>')
 	tmp.flush
 	cmd = prettifier(tmp.path)
+	# Get the output
 	Open3.popen3(*cmd) { |stdin, stdout, stderr|
 		result = stdout.gets(nil)
 	}
 
+	# Close and remove the temporary file
 	tmp.close(true)
 
+	# Append the url we used to the result
 	result.concat("\nRetrieved from "+url)
 
+	# Detect the pager
 	pager = ENV['PAGER']
 	if pager == '' || pager == nil
 		pager = 'less'
 	end
 
+	# Write data to the pager
 	input = IO.popen(pager,'w')
 	input.puts(result)
 	input.close
