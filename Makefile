@@ -44,7 +44,7 @@ test:
 	@ruby -c phpdocr
 # Generate the manpage from the POD
 man:
-	pod2man --name "phpdocr - wine wrapper" --center "" --release "phpdocr $(VERSION)" ./phpdocr.pod ./phpdocr.1
+	pod2man --name "phpdocr - a simple PHP documentation viewer" --center "" --release "phpdocr $(VERSION)" ./phpdocr.pod ./phpdocr.1
 	perl -ni -e 'if(not $$seen) { if(not /Title/) { next } $$seen = 1 }; s/\.Sp//; print' ./phpdocr.1
 # Generate files for distribution
 distrib: clean test gem tarball
