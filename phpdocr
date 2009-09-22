@@ -46,6 +46,11 @@ def lookup (name)
 		end
 	end
 
+	if ! hadFirst
+		puts 'Could not find '+name+' in PHP documentation'
+		return
+	end
+
 	cmd = [ 'html2text','-style','pretty' ]
 	Open3.popen3(*cmd) { |stdin, stdout, stderr|
 		stdin.puts(result)
