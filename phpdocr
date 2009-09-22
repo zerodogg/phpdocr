@@ -362,11 +362,6 @@ def lookup (name, fetchPattern = true, prevSearch = nil)
 	input.close
 end
 
-if ARGV.length == 0 || ARGV.length > 1
-	puts('USAGE: phpdocr [function|statement|operator|class]')
-	exit(0)
-end
-
 opts = GetoptLong.new(
 	[ '--help', '-h', GetoptLong::NO_ARGUMENT ],
 	[ '--verbose', '-v', GetoptLong::NO_ARGUMENT ],
