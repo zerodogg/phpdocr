@@ -15,14 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Fetch from rubygems if available
+require 'rubygems'
 # Command-line parsing
 require 'getoptlong'
 # To run the prettifier
 require 'open3'
 # To create a temporary file with HTML
 require 'tempfile'
+# CGI is used for escaping
+require 'cgi'
 # www-mechanize is used for fetching from HTTP
-require 'rubygems'
 require 'mechanize'
 # Application version
 $version = 0.1
@@ -144,15 +147,16 @@ end
 # Purpose: Look up something
 def lookup (name, fetchPattern = true, prevSearch = nil)
 	# fetchPattern means we should run a serach
+	stringC = String.new(name)
 	if fetchPattern == true
+		stringC = CGI.escape(name)
 		url = 'http://php.net/manual-lookup.php?pattern='+name
 	else
 		# Otherwise, attempt a direct page
-		exactName = String.new(name)
-		if ! exactName =~ /\.php$/
-			exactName.concat('.php')
+		if ! stringC =~ /\.php$/
+			stringC.concat('.php')
 		end
-		url = 'http://php.net/manual/en/'+exactName+'.php'
+		url = 'http://php.net/manual/en/'+stringC+'.php'
 	end
 	# Retrieve data
 	data = getURL(url)
