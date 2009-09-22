@@ -17,22 +17,60 @@
 
 # Command-line parsing
 require 'getoptlong'
+# To run the prettifier
 require 'open3'
+# To create a temporary file with HTML
+require 'tempfile'
 # www-mechanize is used for fetching from HTTP
 require 'rubygems'
 require 'mechanize'
 # Application version
 $version = 0.1
-
+# Bool, true if we should include the user notes section
 $includeUserNotes = false
 
+# Fetch a URL and return its contents
 def getURL (url)
 	www = WWW::Mechanize.new
 	return www.get(url).body
 end
 
+# Purpose: Check for a file in path
+def inPath(exec)
+	ENV['PATH'].split(/:/).each do |part|
+		if File.executable?(part+'/'+exec) and not File.directory?(part+'/'+exec)
+			return true
+		end
+	end
+	return false
+end
+
+# Purpose: Detect and run a prettifier
+def prettifier (path)
+	[ 'elinks', 'links2', 'links' ].each do |links|
+		if inPath(links)
+			return [ links,'-force-html','-dump',path ]
+		end
+	end
+
+	if inPath('html2text')
+		return ['html2text','-style','pretty',path ]
+	end
+
+	if inPath('lynx')
+		return ['lynx','-dump','-force_html',path ]
+	end
+
+	puts
+	puts "Failed to locate any HTML parser. Please install one of the following,"
+	puts "and then re-run phpdocr: elinks, links2, links, html2text, lynx"
+	exit(1)
+end
+
+# Purpose: Look up something
 def lookup (name)
-	data = getURL('http://php.net/manual-lookup.php?pattern='+name);
+	url = 'http://php.net/manual-lookup.php?pattern='+name
+	data = getURL(url)
 	hadFirst = false
 	result = ''
 	data.split(/\n/).each do |line|
@@ -51,14 +89,17 @@ def lookup (name)
 		return
 	end
 
-	cmd = [ 'html2text','-style','pretty' ]
+	tmp = Tempfile.new('phpdocr')
+	tmp.puts('<html><body>'+result+'</body></html>')
+	tmp.flush
+	cmd = prettifier(tmp.path)
 	Open3.popen3(*cmd) { |stdin, stdout, stderr|
-		stdin.puts(result)
-		stdin.flush
-		stdin.close
-
 		result = stdout.gets(nil)
 	}
+
+	tmp.close(true)
+
+	result.concat("\nRetrieved from "+url)
 
 	pager = ENV['PAGER']
 	if pager == '' || pager == nil
@@ -68,6 +109,11 @@ def lookup (name)
 	input = IO.popen(pager,'w')
 	input.puts(result)
 	input.close
+end
+
+if ARGV.length == 0 || ARGV.length > 1
+	puts('USAGE: phpdocr [function|statement|operator|class]')
+	exit(0)
 end
 
 lookup(ARGV.shift)
