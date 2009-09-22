@@ -31,11 +31,110 @@ require 'mechanize'
 $version = 0.1
 # Bool, true if we should include the user notes section
 $includeUserNotes = false
+# Verbose mode (true/false)
+$verbose = false
+
+# Purpose: Print formatted --help output
+# Usage: printHelp('-shortoption', '--longoption', 'description');
+#  Description will be reformatted to fit within a normal terminal
+def printHelp (short,long,description)
+	maxlen = 80
+	optionlen = 20
+	# Check if the short/long are LONGER than optionlen, if so, we need
+	# to do some additional magic to take up only $maxlen.
+	# The +1 here is because we always add a space between them, no matter what
+	if (short.length + long.length + 1) > optionlen
+		optionlen = short.length + long.length + 1;
+	end
+
+	generatedDesc = ''
+	currdesc = ''
+
+	description.split(/ /).each do |part|
+		if(generatedDesc.length > 0)
+			if (currdesc.length + part.length + 1 + 20) > maxlen
+				generatedDesc.concat("\n")
+				currdesc = ''
+			else
+				currdesc.concat(' ')
+				generatedDesc.concat(' ')
+			end
+		end
+		currdesc.concat(part)
+		generatedDesc.concat(part)
+	end
+	if !(generatedDesc.length > 0)
+		raise("Option mismatch")
+	end
+	generatedDesc.split(/\n/).each do |descr|
+		printf("%-4s %-15s %s\n",short,long,descr)
+		short = ''; long = ''
+	end
+end
+
+# Purpose: Print the help output
+def Help ()
+	puts "phpdocr "+$version.to_s
+	puts ""
+	puts "Usage: phpdocr [OPTIONS] [FUNCTION/CLASS/SEARCH STRING/..]"
+	puts ""
+	printHelp('-h','--help','Display this help text')
+	printHelp('-c','--comments','Include the user comments part of the documentation in output')
+	printHelp('-v','--verbose','Enable verbose mode')
+	printHelp('-v','--version','Output the phpdocr version and exit')
+	printHelp('','--man','Show the phpdocr manpage')
+end
+
+# Purpose: Output a string if in verbose mode
+def vputs (str)
+	if $verbose
+		puts(str)
+	end
+end
+
+# Purpose: Show the manpage
+def showManPage ()
+	mySelf = File.expand_path($0)
+	while File.symlink?(mySelf)
+		mySelf = File.readlink(mySelf)
+	end
+	sourceDir = '.'
+	if mySelf != nil
+		sourceDir = File.dirname(mySelf)
+	end
+	if File.exists?(sourceDir+'/phpdocr.1')
+		exec('man',sourceDir+'/phpdocr.1')
+	elsif File.exists?('./phpdocr.1')
+		exec('man','./phpdocr.1')
+	end
+	puts
+	puts 'phpdocr failed to locate its manpage.'
+	puts 'Run the following command to view it:'
+	puts '\curl -s "http://github.com/zerodogg/phpdocr/raw/master/phpdocr.1" |  groff -T utf8 -man | \less'
+end
+
+# Purpose: Print debugging info
+def debugInfo ()
+	puts "phpdocr "+$version.to_s
+	begin
+		if inPath('md5sum')
+			outStr = nil
+			out = IO.popen('md5sum '+File.expand_path($0))
+			outStr = out.readline
+			outStr.sub!(/\s+.*$/,'')
+			puts('md5sum: '+outStr)
+		end
+	rescue
+		puts('(exception while generating md5sum: '+$!+')')
+	end
+	exit(0)
+end
 
 # Fetch a URL and return its contents
 def getURL (url)
 	begin
 		www = WWW::Mechanize.new
+		vputs('Downloading '+url)
 		return www.get(url).body
 	rescue
 		return ''
@@ -257,4 +356,54 @@ if ARGV.length == 0 || ARGV.length > 1
 	exit(0)
 end
 
-lookup(ARGV.shift)
+opts = GetoptLong.new(
+	[ '--help', '-h', GetoptLong::NO_ARGUMENT ],
+	[ '--verbose', '-v', GetoptLong::NO_ARGUMENT ],
+	[ '--comments','-c', GetoptLong::NO_ARGUMENT ],
+	[ '--debuginfo', GetoptLong::NO_ARGUMENT ],
+	[ '--version', GetoptLong::NO_ARGUMENT ],
+	[ '--man', GetoptLong::NO_ARGUMENT ]
+)
+
+# Handle command-line arguments
+begin
+	opts.each do |opt, arg|
+		case opt
+		when '--help'
+			Help()
+			exit(0)
+		when '--verbose'
+			$verbose = true
+		when '--comments'
+			$includeUserNotes = true
+		when '--debuginfo'
+			debugInfo()
+		when '--version'
+			puts('phpdocr version '+$version.to_s)
+			exit(0)
+		when '--man'
+			showManPage()
+			exit(0)
+		end
+	end
+rescue
+	puts('See --help for more inforation')
+	exit(1)
+end
+
+if ARGV.length == 0 || ARGV.length > 1
+	Help()
+	exit(1)
+end
+
+begin
+	lookup(ARGV.shift)
+rescue
+	puts('An exception has occurred and phpdocr can not continue.')
+	puts('This almost certainly reflects a bug in phpdocr.')
+	puts('Please check that you have the latest version off phpdocr,')
+	puts('and if you do, report this issue to http://random.zerodogg.org/phpdocr/bugs')
+	puts()
+	puts('Exception: '+$!)
+	exit(1)
+end
