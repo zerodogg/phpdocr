@@ -127,6 +127,13 @@ def debugInfo ()
 	rescue
 		puts('(exception while generating md5sum: '+$!+')')
 	end
+	prettifierCmd = prettifier('path',false)
+	if prettifierCmd == nil
+		prettifierCmd = '(missing)'
+	else
+		prettifierCmd = String.new(prettifierCmd.join(' '))
+	end
+	puts 'Prettifier: '+prettifierCmd
 	exit(0)
 end
 
@@ -152,7 +159,7 @@ def inPath(exec)
 end
 
 # Purpose: Detect and run a prettifier
-def prettifier (path)
+def prettifier (path, missingIsFatal = true)
 	# Links family, all use the same syntax
 	[ 'elinks', 'links2', 'links' ].each do |links|
 		if inPath(links)
@@ -170,11 +177,15 @@ def prettifier (path)
 		return ['lynx','-dump','-force_html',path ]
 	end
 
-	# If we found none, then give up
-	puts
-	puts "Failed to locate any HTML parser. Please install one of the following,"
-	puts "and then re-run phpdocr: elinks, links2, links, html2text, lynx"
-	exit(1)
+	if missingIsFatal
+		# If we found none, then give up
+		puts
+		puts "Failed to locate any HTML parser. Please install one of the following,"
+		puts "and then re-run phpdocr: elinks, links2, links, html2text, lynx"
+		exit(1)
+	else
+		return nil
+	end
 end
 
 # Purpose: Convert links
