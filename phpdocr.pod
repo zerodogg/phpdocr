@@ -1,0 +1,82 @@
+# Yes this is a pod file living in a Ruby project.
+#
+# POD is a very nice format to write documentation in, and RDoc does
+# not appear to be able to properly export to manpages, hence why I
+# decided to use POD. The manpage that also lives in the git repo
+# is the one that is distributed. The POD only lives in the git repo
+# and is used to generate the manpage.
+
+=head1 NAME
+
+phpdocr - a simple way to access PHP documentation from the command-line
+
+=head1 SYNOPSIS
+
+phpdocr I<[OPTIONS]> I<[FUNCTION/CLASS/SEARCH STRING/..]>
+
+=head1 DESCRIPTION
+
+B<phpdocr> is a simple way to access PHP documentation from php.net
+from the command-line.
+
+It will download, prettify, and output PHP documentation for the
+function/class/.. that was supplied on the command-line, much like
+perldoc(1) does for perl(1) and ri does for ruby(1).
+
+phpdocr will send its output to your PAGER (if it is set, otherwise
+it will default to less).
+
+=head1 OPTIONS
+
+=over
+
+=item B<-h, --help>
+
+Display the help screen
+
+=item B<-v, --verbose>
+
+Increase verbosity. When this is present phpdocr will tell you additional
+information about what it is doing, ie. what page it is downloading at the
+moment.
+
+=item B<-c, --comments>
+
+php.net has comments associated with most pages. By default phpdocr will
+filter these away, however some times you may want to see them, in that
+case supply --comments and phpdocr will include them in its output.
+
+=item B<--man>
+
+Show the manpage. Normally 'man phpdocr' would do, but when phpdocr is
+installed from a rubygem the phpdocr manpage isn't placed anywhere
+in man(1)'s path, this will autodetect its location and issue man
+directly on the phpdocr.1 file (and thus work even when 'man phpdocr'
+does not).
+
+=back
+
+=head1 DEPENDENCIES
+
+Requires one of: elinks, links2, links, html2text or lynx for HTML parsing.
+
+Requires the mechanize rubygem for fetching stuff over HTTP.
+
+=head1 HELP/SUPPORT
+
+If you need help or support please visit the website at L<http://random.zerodogg.org/phpdocr>
+
+=head1 BUGS AND LIMITATIONS
+
+If you find a bug, please report it at L<http://random.zerodogg.org/phpdocr/bugs>
+
+=head1 AUTHOR
+
+B<phpdocr> is written by Eskild Hustvedt <I<code at zerodogg dot org>>
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (C) Eskild Hustvedt 2009
+
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

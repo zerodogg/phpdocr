@@ -1,0 +1,64 @@
+.IX Title "phpdocr - a simple PHP documentation viewer 1"
+.TH "phpdocr - a simple PHP documentation viewer" 1 "2009-09-22" "phpdocr 0.1" ""
+.\" For nroff, turn off justification.  Always turn off hyphenation; it makes
+.\" way too many mistakes in technical documents.
+.if n .ad l
+.nh
+.SH "NAME"
+phpdocr \- a simple way to access PHP documentation from the command\-line
+.SH "SYNOPSIS"
+.IX Header "SYNOPSIS"
+phpdocr \fI[\s-1OPTIONS\s0]\fR \fI[\s-1FUNCTION/CLASS/SEARCH\s0 \s-1STRING/\s0..]\fR
+.SH "DESCRIPTION"
+.IX Header "DESCRIPTION"
+\&\fBphpdocr\fR is a simple way to access \s-1PHP\s0 documentation from php.net
+from the command-line.
+.PP
+It will download, prettify, and output \s-1PHP\s0 documentation for the
+function/class/.. that was supplied on the command-line, much like
+\&\fIperldoc\fR\|(1) does for \fIperl\fR\|(1) and ri does for \fIruby\fR\|(1).
+.PP
+phpdocr will send its output to your \s-1PAGER\s0 (if it is set, otherwise
+it will default to less).
+.SH "OPTIONS"
+.IX Header "OPTIONS"
+.IP "\fB\-h, \-\-help\fR" 4
+.IX Item "-h, --help"
+Display the help screen
+.IP "\fB\-v, \-\-verbose\fR" 4
+.IX Item "-v, --verbose"
+Increase verbosity. When this is present phpdocr will tell you additional
+information about what it is doing, ie. what page it is downloading at the
+moment.
+.IP "\fB\-c, \-\-comments\fR" 4
+.IX Item "-c, --comments"
+php.net has comments associated with most pages. By default phpdocr will
+filter these away, however some times you may want to see them, in that
+case supply \-\-comments and phpdocr will include them in its output.
+.IP "\fB\-\-man\fR" 4
+.IX Item "--man"
+Show the manpage. Normally 'man phpdocr' would do, but when phpdocr is
+installed from a rubygem the phpdocr manpage isn't placed anywhere
+in \fIman\fR\|(1)'s path, this will autodetect its location and issue man
+directly on the phpdocr.1 file (and thus work even when 'man phpdocr'
+does not).
+.SH "DEPENDENCIES"
+.IX Header "DEPENDENCIES"
+Requires one of: elinks, links2, links, html2text or lynx for \s-1HTML\s0 parsing.
+.PP
+Requires the mechanize rubygem for fetching stuff over \s-1HTTP\s0.
+.SH "HELP/SUPPORT"
+.IX Header "HELP/SUPPORT"
+If you need help or support please visit the website at <http://random.zerodogg.org/phpdocr>
+.SH "BUGS AND LIMITATIONS"
+.IX Header "BUGS AND LIMITATIONS"
+If you find a bug, please report it at <http://random.zerodogg.org/phpdocr/bugs>
+.SH "AUTHOR"
+.IX Header "AUTHOR"
+\&\fBphpdocr\fR is written by Eskild Hustvedt <\fIcode at zerodogg dot org\fR>
+.SH "LICENSE AND COPYRIGHT"
+.IX Header "LICENSE AND COPYRIGHT"
+Copyright (C) Eskild Hustvedt 2009
+.PP
+This is free software; see the source for copying conditions.  There is \s-1NO\s0
+warranty; not even for \s-1MERCHANTABILITY\s0 or \s-1FITNESS\s0 \s-1FOR\s0 A \s-1PARTICULAR\s0 \s-1PURPOSE\s0.
