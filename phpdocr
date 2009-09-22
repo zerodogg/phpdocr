@@ -71,8 +71,8 @@ def prettifier (path)
 	exit(1)
 end
 
-# Purpose: Parse an index list
-def parseIndexList (list)
+# Purpose: Convert links
+def convertLinks (list)
 	result = ''
 
 	rmlastA = false
@@ -83,10 +83,11 @@ def parseIndexList (list)
 			currlink = String.new(line)
 			currlink.sub!(/^a href="/,'')
 			currlink.sub!(/".*$/,'')
+			currlink.sub!(/#.*$/,'')
 			currlink.sub!(/\.php$/,'')
-			currlink.sub!(/^function/,'')
+			currlink.sub!(/^function\./,'')
 			line.sub!(/^[^>]+>/,'')
-			line = String.new('[Link: '+currlink+'] '+line)
+			line = String.new('['+currlink+'] '+line)
 			rmlastA = true
 		elsif line =~ /\/a>/ and rmlastA
 			line.sub!(/^\/a>/,'')
@@ -164,30 +165,32 @@ def lookup (name, fetchPattern = true, prevSearch = nil)
 		end
 	end
 
-	if ! hadFirst
-		if hadUDM
-			result = parseIndexList(indexResult)
+	if ! hadFirst && ! hadUDM
+		if fetchPattern
+			lookup(name,false,data)
 		else
-			if fetchPattern
-				lookup(name,false,data)
-			else
-				puts
-				puts 'Could not find '+name+' in PHP documentation'
-				if prevSearch != nil
-					suggest = fetchSuggestions(prevSearch)
-					if suggest != nil
-						puts "\n"
-						puts "Perhaps you were looking for one of these?"
-						while suggest.length > 0
-							printf("%-20s %-20s %-20s %-20s\n",suggest[0],suggest[1],suggest[2],suggest[3])
-							4.times { suggest.shift }
-						end
-						puts suggest
+			puts
+			puts 'Could not find '+name+' in PHP documentation'
+			if prevSearch != nil
+				suggest = fetchSuggestions(prevSearch)
+				if suggest != nil
+					puts "\n"
+					puts "Perhaps you were looking for one of these?"
+					while suggest.length > 0
+						printf("%-20s %-20s %-20s %-20s\n",suggest[0],suggest[1],suggest[2],suggest[3])
+						4.times { suggest.shift }
 					end
+					puts suggest
 				end
 			end
-			return
 		end
+		return
+	end
+
+	if hadFirst
+		result = convertLinks(result)
+	else
+		result = convertLinks(indexResult)
 	end
 
 	tmp = Tempfile.new('phpdocr')
