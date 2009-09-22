@@ -17,8 +17,52 @@
 
 # Command-line parsing
 require 'getoptlong'
+require 'open3'
 # www-mechanize is used for fetching from HTTP
 require 'rubygems'
 require 'mechanize'
 # Application version
 $version = 0.1
+
+$includeUserNotes = false
+
+def getURL (url)
+	www = WWW::Mechanize.new
+	return www.get(url).body
+end
+
+def lookup (name)
+	data = getURL('http://php.net/manual-lookup.php?pattern='+name);
+	hadFirst = false
+	result = ''
+	data.split(/\n/).each do |line|
+		if hadFirst
+			if ! $includeUserNotes && line =~ /User Contributed Notes/
+				break
+			end
+			result.concat(line)
+		elsif line =~ /ect1/
+			hadFirst = true
+		end
+	end
+
+	cmd = [ 'html2text','-style','pretty' ]
+	Open3.popen3(*cmd) { |stdin, stdout, stderr|
+		stdin.puts(result)
+		stdin.flush
+		stdin.close
+
+		result = stdout.gets(nil)
+	}
+
+	pager = ENV['PAGER']
+	if pager == '' || pager == nil
+		pager = 'less'
+	end
+
+	input = IO.popen(pager,'w')
+	input.puts(result)
+	input.close
+end
+
+lookup(ARGV.shift)
