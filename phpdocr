@@ -27,12 +27,16 @@ require 'tempfile'
 require 'cgi'
 # www-mechanize is used for fetching from HTTP
 require 'mechanize'
+# For creating the cache dir if needed
+require 'fileutils'
 # Application version
 $version = 0.1
 # Bool, true if we should include the user notes section
 $includeUserNotes = false
 # Verbose mode (true/false)
 $verbose = false
+# Cache enabled?
+$cache = false
 
 # Purpose: Print formatted --help output
 # Usage: printHelp('-shortoption', '--longoption', 'description');
@@ -258,8 +262,22 @@ def fetchSuggestions (data)
 	end
 end
 
-# Purpose: Look up something
-def lookup (name, fetchPattern = true, prevSearch = nil)
+# Purpose: Display the contents of the supplied string inside the users PAGER
+def pager(contents)
+	# Detect the pager
+	pager = ENV['PAGER']
+	if pager == '' || pager == nil
+		pager = 'less'
+	end
+
+	# Write data to the pager
+	input = IO.popen(pager,'w')
+	input.puts(contents)
+	input.close
+end
+
+# Purpose: Look up something on the website
+def lookupWeb (name, fetchPattern = true, prevSearch = nil)
 	# fetchPattern means we should run a serach
 	stringC = String.new(name)
 	if fetchPattern == true
@@ -307,7 +325,7 @@ def lookup (name, fetchPattern = true, prevSearch = nil)
 	if ! hadFirst && ! hadUDM
 		# If this was a fetchPattern run, try a direct one
 		if fetchPattern
-			lookup(name,false,data)
+			return lookupWeb(name,false,data)
 		else
 			# This was a direct one, output errors
 			puts
@@ -325,8 +343,8 @@ def lookup (name, fetchPattern = true, prevSearch = nil)
 					end
 				end
 			end
+			return
 		end
-		return
 	end
 
 	# If we 'hadFirst', then result contains what we want, otherwise use
@@ -354,22 +372,75 @@ def lookup (name, fetchPattern = true, prevSearch = nil)
 	# Append the url we used to the result
 	result.concat("\nRetrieved from "+url)
 
-	# Detect the pager
-	pager = ENV['PAGER']
-	if pager == '' || pager == nil
-		pager = 'less'
+	return result
+end
+
+# Purpose: Prepare the cache dir
+def prepCacheDir (name)
+	cacheDir = ENV['HOME']+'/.phpdocr/'
+	if ! File.directory?(cacheDir)
+		if File.exists?(cacheDir)
+			puts cacheDir+': exists but is not a directory, caching disabled.'
+			$cache = false
+			return nil
+		end
+		FileUtils.mkpath(cacheDir)
+	end
+	name.gsub!(/\//,'')
+	return cacheDir+'cache.'+name
+end
+
+# Purpose: Look something up in the cache
+def lookupCache (name)
+	cacheFile = prepCacheDir(name)
+	if cacheFile == nil
+		return
 	end
 
-	# Write data to the pager
-	input = IO.popen(pager,'w')
-	input.puts(result)
-	input.close
+	if File.exists?(cacheFile)
+		file = File.open(cacheFile)
+		vputs('Loaded information for '+name+' from the cache')
+		return file.gets(nil)
+	end
+
+	return nil
+end
+
+# Purpose: Write something to the cache
+def writeToCache (name,data)
+	cacheFile = prepCacheDir(name)
+	if cacheFile == nil
+		return
+	end
+	file = File.open(cacheFile,'w')
+	file.puts(data)
+	file.close
+end
+
+# Purpose: Look something up
+def lookup(name)
+	result = nil
+	sourceWasWeb = true
+	if $cache
+		sourceWasWeb = false
+		result = lookupCache(name)
+	end
+	if !$cache || result == nil
+		result = lookupWeb(name)
+	end
+	if result != nil
+		if $cache && sourceWasWeb
+			writeToCache(name,result)
+		end
+		pager(result)
+	end
 end
 
 opts = GetoptLong.new(
 	[ '--help', '-h', GetoptLong::NO_ARGUMENT ],
 	[ '--verbose', '-v', GetoptLong::NO_ARGUMENT ],
 	[ '--comments','-u', GetoptLong::NO_ARGUMENT ],
+	[ '--cache','-c', GetoptLong::NO_ARGUMENT ],
 	[ '--debuginfo', GetoptLong::NO_ARGUMENT ],
 	[ '--version', GetoptLong::NO_ARGUMENT ],
 	[ '--man', GetoptLong::NO_ARGUMENT ]
@@ -386,6 +457,8 @@ begin
 			$verbose = true
 		when '--comments'
 			$includeUserNotes = true
+		when '--cache'
+			$cache = true
 		when '--debuginfo'
 			debugInfo()
 		when '--version'
