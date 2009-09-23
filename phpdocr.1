@@ -16,7 +16,9 @@ from the command-line.
 .PP
 It will download, prettify, and output \s-1PHP\s0 documentation for the
 function/class/.. that was supplied on the command-line, much like
-\&\fIperldoc\fR\|(1) does for \fIperl\fR\|(1) and ri does for \fIruby\fR\|(1).
+\&\fIperldoc\fR\|(1) does for \fIperl\fR\|(1) and ri does for \fIruby\fR\|(1). Unless you explicitly
+tell it not to, phpdocr will also cache the documentation locally
+for fast retrieval in the future.
 .PP
 phpdocr will send its output to your \s-1PAGER\s0 (if it is set, otherwise
 it will default to less).
