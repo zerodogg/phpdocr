@@ -160,8 +160,12 @@ end
 
 # Purpose: Detect and run a prettifier
 def prettifier (path, missingIsFatal = true)
-	# Links family, all use the same syntax
-	[ 'elinks', 'links2', 'links' ].each do |links|
+	# Links family, they use basically the same syntax, but we append
+	# -no-references for elinks.
+	if inPath('elinks')
+		return [ 'elinks','-force-html','-no-references','-dump' ]
+	end
+	['links2', 'links' ].each do |links|
 		if inPath(links)
 			return [ links,'-force-html','-dump',path ]
 		end
@@ -196,10 +200,10 @@ def convertLinks (list)
 	first = true
 
 	list.split(/</).each do |line|
-		if line =~ /^a href="\w/
+		if line =~ /^a[^>]+href="\w/
 			currlink = String.new(line)
 			# Remove the href
-			currlink.sub!(/^a href="/,'')
+			currlink.sub!(/^a[^>]+href="/,'')
 			# Remove whatever is after the href
 			currlink.sub!(/".*$/,'')
 			# Remove '#' links
@@ -281,7 +285,7 @@ def lookup (name, fetchPattern = true, prevSearch = nil)
 	# Parse it
 	data.split(/\n/).each do |line|
 		if hadFirst
-			if ! $includeUserNotes && line =~ /User Contributed Notes/
+			if ! $includeUserNotes && line =~ /(User Contributed Notes|<div id="usernotes">)/
 				break
 			end
 			result.concat(line)
