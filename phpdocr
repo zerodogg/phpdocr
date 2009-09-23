@@ -102,6 +102,12 @@ end
 
 # Purpose: Show the manpage
 def showManPage ()
+	if ! inPath('man')
+		puts
+		puts "You don't appear to have the 'man' program installed."
+		puts "Please install it, then re-run phpdocr --man"
+		exit(0)
+	end
 	mySelf = File.expand_path($0)
 	while File.symlink?(mySelf)
 		mySelf = File.readlink(mySelf)
@@ -110,10 +116,17 @@ def showManPage ()
 	if mySelf != nil
 		sourceDir = File.dirname(mySelf)
 	end
-	if File.exists?(sourceDir+'/phpdocr.1')
-		exec('man',sourceDir+'/phpdocr.1')
-	elsif File.exists?('./phpdocr.1')
-		exec('man','./phpdocr.1')
+	dirs = [sourceDir]
+	if ENV['MANPATH']
+		dirs.concat(ENV['MANPATH'].split(':'))
+	end
+	dirs.push('./')
+	dirs.each do |dir|
+		[ 'phpdocr.1','man1/phpdocr.1','man1/phpdocr.1.gz','man1/phpdocr.1.bz2','man1/phpdocr.1.lzma'].each do |manFile|
+			if File.exists?(dir+'/'+manFile)
+				exec('man',dir+'/'+manFile)
+			end
+		end
 	end
 	puts
 	puts 'phpdocr failed to locate its manpage.'
