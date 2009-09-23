@@ -177,6 +177,11 @@ def prettifier (path, missingIsFatal = true)
 		end
 	end
 
+	# w3m
+	if inPath('w3m')
+		return ['w3m','-dump','-T','text/html',path]
+	end
+
 	# html2text
 	if inPath('html2text')
 		return ['html2text','-style','pretty',path ]
@@ -191,7 +196,7 @@ def prettifier (path, missingIsFatal = true)
 		# If we found none, then give up
 		puts
 		puts "Failed to locate any HTML parser. Please install one of the following,"
-		puts "and then re-run phpdocr: elinks, links2, links, html2text, lynx"
+		puts "and then re-run phpdocr: elinks, links2, links, w3m, html2text, lynx"
 		exit(1)
 	else
 		return nil
@@ -389,7 +394,11 @@ def prepCacheDir (name)
 		FileUtils.mkpath(cacheDir)
 	end
 	name.gsub!(/\//,'')
-	return cacheDir+'cache.'+name
+	filePrefix = 'cache.'
+	if $includeUserNotes
+		filePrefix = 'cache.withNotes.'
+	end
+	return cacheDir+filePrefix+name
 end
 
 # Purpose: Look something up in the cache
