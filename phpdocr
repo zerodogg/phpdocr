@@ -37,6 +37,8 @@ $includeUserNotes = false
 $verbose = false
 # Cache enabled?
 $cache = false
+# php.net mirror
+$mirror = 'php.net'
 
 # Purpose: Print formatted --help output
 # Usage: printHelp('-shortoption', '--longoption', 'description');
@@ -167,7 +169,7 @@ def prettifier (path, missingIsFatal = true)
 	# Links family, they use basically the same syntax, but we append
 	# -no-references for elinks.
 	if inPath('elinks')
-		return [ 'elinks','-force-html','-no-references','-dump' ]
+		return [ 'elinks','-force-html','-no-references','-dump',path ]
 	end
 	['links2', 'links' ].each do |links|
 		if inPath(links)
@@ -282,13 +284,13 @@ def lookupWeb (name, fetchPattern = true, prevSearch = nil)
 	stringC = String.new(name)
 	if fetchPattern == true
 		stringC = CGI.escape(name)
-		url = 'http://php.net/manual-lookup.php?pattern='+name
+		url = 'http://'+$mirror+'/manual-lookup.php?pattern='+name
 	else
 		# Otherwise, attempt a direct page
 		if ! stringC =~ /\.php$/
 			stringC.concat('.php')
 		end
-		url = 'http://php.net/manual/en/'+stringC+'.php'
+		url = 'http://'+$mirror+'/manual/en/'+stringC+'.php'
 	end
 	# Retrieve data
 	data = getURL(url)
@@ -420,12 +422,12 @@ end
 # Purpose: Look something up
 def lookup(name)
 	result = nil
-	sourceWasWeb = true
+	sourceWasWeb = false
 	if $cache
-		sourceWasWeb = false
 		result = lookupCache(name)
 	end
 	if !$cache || result == nil
+		sourceWasWeb = true
 		result = lookupWeb(name)
 	end
 	if result != nil
@@ -443,6 +445,7 @@ opts = GetoptLong.new(
 	[ '--cache','-c', GetoptLong::NO_ARGUMENT ],
 	[ '--debuginfo', GetoptLong::NO_ARGUMENT ],
 	[ '--version', GetoptLong::NO_ARGUMENT ],
+	[ '--mirror', '-m', GetoptLong::REQUIRED_ARGUMENT ],
 	[ '--man', GetoptLong::NO_ARGUMENT ]
 )
 
@@ -464,6 +467,8 @@ begin
 		when '--version'
 			puts('phpdocr version '+$version.to_s)
 			exit(0)
+		when '--mirror'
+			$mirror = arg
 		when '--man'
 			showManPage()
 			exit(0)
