@@ -40,7 +40,7 @@ Increase verbosity. When this is present phpdocr will tell you additional
 information about what it is doing, ie. what page it is downloading at the
 moment.
 
-=item B<-c, --comments>
+=item B<-o, --comments>
 
 php.net has comments associated with most pages. By default phpdocr will
 filter these away, however some times you may want to see them, in that

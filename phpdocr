@@ -79,7 +79,7 @@ def Help ()
 	puts "Usage: phpdocr [OPTIONS] [FUNCTION/CLASS/SEARCH STRING/..]"
 	puts ""
 	printHelp('-h','--help','Display this help text')
-	printHelp('-c','--comments','Include the user comments part of the documentation in output')
+	printHelp('-u','--comments','Include the user comments part of the documentation in output')
 	printHelp('-v','--verbose','Enable verbose mode')
 	printHelp('-v','--version','Output the phpdocr version and exit')
 	printHelp('','--man','Show the phpdocr manpage')
@@ -369,7 +369,7 @@ end
 opts = GetoptLong.new(
 	[ '--help', '-h', GetoptLong::NO_ARGUMENT ],
 	[ '--verbose', '-v', GetoptLong::NO_ARGUMENT ],
-	[ '--comments','-c', GetoptLong::NO_ARGUMENT ],
+	[ '--comments','-u', GetoptLong::NO_ARGUMENT ],
 	[ '--debuginfo', GetoptLong::NO_ARGUMENT ],
 	[ '--version', GetoptLong::NO_ARGUMENT ],
 	[ '--man', GetoptLong::NO_ARGUMENT ]
