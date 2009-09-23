@@ -36,7 +36,7 @@ $includeUserNotes = false
 # Verbose mode (true/false)
 $verbose = false
 # Cache enabled?
-$cache = false
+$cache = true
 # php.net mirror
 $mirror = 'php.net'
 
@@ -86,8 +86,10 @@ def Help ()
 	puts ""
 	printHelp('-h','--help','Display this help text')
 	printHelp('-u','--comments','Include the user comments part of the documentation in output')
+	printHelp('-n','--no-cache','Disable the local doc cache (~/.phpdocr/)')
 	printHelp('-v','--verbose','Enable verbose mode')
-	printHelp('-v','--version','Output the phpdocr version and exit')
+	printHelp('-m','--mirror','Use the supplied mirror of php.net')
+	printHelp('','--version','Output the phpdocr version and exit')
 	printHelp('','--man','Show the phpdocr manpage')
 end
 
@@ -451,7 +453,7 @@ opts = GetoptLong.new(
 	[ '--help', '-h', GetoptLong::NO_ARGUMENT ],
 	[ '--verbose', '-v', GetoptLong::NO_ARGUMENT ],
 	[ '--comments','-u', GetoptLong::NO_ARGUMENT ],
-	[ '--cache','-c', GetoptLong::NO_ARGUMENT ],
+	[ '--no-cache','--nocache','-n', GetoptLong::NO_ARGUMENT ],
 	[ '--debuginfo', GetoptLong::NO_ARGUMENT ],
 	[ '--version', GetoptLong::NO_ARGUMENT ],
 	[ '--mirror', '-m', GetoptLong::REQUIRED_ARGUMENT ],
@@ -469,8 +471,8 @@ begin
 			$verbose = true
 		when '--comments'
 			$includeUserNotes = true
-		when '--cache'
-			$cache = true
+		when '--no-cache'
+			$cache = false
 		when '--debuginfo'
 			debugInfo()
 		when '--version'
