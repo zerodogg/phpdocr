@@ -46,6 +46,18 @@ php.net has comments associated with most pages. By default phpdocr will
 filter these away, however some times you may want to see them, in that
 case supply --comments and phpdocr will include them in its output.
 
+=item B<-n, --no-cache>
+
+By default, phpdocr will cache documentation locally so that it can
+easily be retrieved later without having to re-download it. This
+parameter disables all caching (both reading from the cache, and
+writing to the cache).
+
+=item B<-m, --mirror> I<PATH>
+
+By default phpdocr will connect to php.net. Use this to make it connect
+to a specific mirror instead (ie. no2.php.net).
+
 =item B<--man>
 
 Show the manpage. Normally 'man phpdocr' would do, but when phpdocr is
@@ -55,6 +67,13 @@ directly on the phpdocr.1 file (and thus work even when 'man phpdocr'
 does not).
 
 =back
+
+=head1 FILES
+
+I<~/.phpdocr> - this is where phpdocr will store any cached documentation.
+It is safe to remove this directory, or any of its contents, at any time
+if you need the disk space. phpdocr will simply re-download the documentation
+next time you request it.
 
 =head1 DEPENDENCIES
 
