@@ -1,1 +1,11 @@
-phpdocr is a simple way to access PHP documentation from the command-line
+phpdocr is a simple way to access PHP documentation from php.net from the
+command-line.
+
+It will download, prettify, and output PHP documentation for the
+function/class/.. that was supplied on the command-line, much like perldoc(1)
+does for perl(1) and ri does for ruby(1). Unless you explicitly tell it not to,
+phpdocr will also cache the documentation locally for fast retrieval in the
+future.
+
+phpdocr will send its output to your PAGER (if it is set, otherwise it will
+default to less).
