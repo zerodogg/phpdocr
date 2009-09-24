@@ -28,8 +28,9 @@ for fast retrieval in the future.
 phpdocr will send its output to your PAGER (if it is set, otherwise
 it will default to less).
 
-Links is output as [text], where whatever is between the brackets is
-what you can supply to phpdocr to get that documentation page.
+Links to further information are displayed in the output as [link-text].
+The link-text can be supplied to phpdocr in a subsequent invocation to
+get more detailed information on that subject.
 
 =head1 OPTIONS
 
