@@ -1,5 +1,5 @@
 .IX Title "PHPDOCR 1"
-.TH PHPDOCR 1 "2009-09-23" "phpdocr 0.1" ""
+.TH PHPDOCR 1 "2009-09-24" "phpdocr 0.1" ""
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -22,6 +22,9 @@ for fast retrieval in the future.
 .PP
 phpdocr will send its output to your \s-1PAGER\s0 (if it is set, otherwise
 it will default to less).
+.PP
+Links is output as [text], where whatever is between the brackets is
+what you can supply to phpdocr to get that documentation page.
 .SH "OPTIONS"
 .IX Header "OPTIONS"
 .IP "\fB\-h, \-\-help\fR" 4
@@ -60,9 +63,25 @@ does not).
 It is safe to remove this directory, or any of its contents, at any time
 if you need the disk space. phpdocr will simply re-download the documentation
 next time you request it.
+.SH "EXAMPLES"
+.IX Header "EXAMPLES"
+.IP "\fIphpdocr date\fR" 4
+.IX Item "phpdocr date"
+Will download and output the documentation for the date function, or
+load it from cache if it has been cached.
+.IP "\fIphpdocr \-u localtime\fR" 4
+.IX Item "phpdocr -u localtime"
+Will download and output the documentation for the localtime function
+and the user comments associated with it. If an entry of the localtime
+documentation with comments is already in cache, it will load it from
+there instead.
+.IP "\fIphpdocr \-n foreach\fR" 4
+.IX Item "phpdocr -n foreach"
+Will download and output the documentation for the foreach construct,
+ignoring any cached information and not writing the result to the cache.
 .SH "DEPENDENCIES"
 .IX Header "DEPENDENCIES"
-Requires one of: elinks, links2, links, html2text or lynx for \s-1HTML\s0 parsing.
+Requires one of: elinks, links2, links, w3m, html2text or lynx for \s-1HTML\s0 parsing.
 .PP
 Requires the mechanize rubygem for fetching stuff over \s-1HTTP\s0.
 .SH "HELP/SUPPORT"

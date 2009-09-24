@@ -28,6 +28,9 @@ for fast retrieval in the future.
 phpdocr will send its output to your PAGER (if it is set, otherwise
 it will default to less).
 
+Links is output as [text], where whatever is between the brackets is
+what you can supply to phpdocr to get that documentation page.
+
 =head1 OPTIONS
 
 =over
@@ -77,9 +80,32 @@ It is safe to remove this directory, or any of its contents, at any time
 if you need the disk space. phpdocr will simply re-download the documentation
 next time you request it.
 
+=head1 EXAMPLES
+
+=over
+
+=item I<phpdocr date>
+
+Will download and output the documentation for the date function, or
+load it from cache if it has been cached.
+
+=item I<phpdocr -u localtime>
+
+Will download and output the documentation for the localtime function
+and the user comments associated with it. If an entry of the localtime
+documentation with comments is already in cache, it will load it from
+there instead.
+
+=item I<phpdocr -n foreach>
+
+Will download and output the documentation for the foreach construct,
+ignoring any cached information and not writing the result to the cache.
+
+=back
+
 =head1 DEPENDENCIES
 
-Requires one of: elinks, links2, links, html2text or lynx for HTML parsing.
+Requires one of: elinks, links2, links, w3m, html2text or lynx for HTML parsing.
 
 Requires the mechanize rubygem for fetching stuff over HTTP.
 
