@@ -294,8 +294,11 @@ def pager(contents)
 
 	# Write data to the pager
 	input = IO.popen(pager,'w')
-	input.puts(contents)
-	input.close
+	begin
+		input.puts(contents)
+		input.close
+	rescue
+	end
 end
 
 # Purpose: Look up something on the website
