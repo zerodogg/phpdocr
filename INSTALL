@@ -1,9 +1,10 @@
 Installation instructions for phpdocr
 ---------------------------------------
 
-In order to install phpdocr simply run the command "make install" (without
-the quotes) in the phpdocr directory. You can do this as your user to install
-it locally for a single user, or as root to install it globally for all users.
+In order to install phpdocr simply run the following command:
+	make install
+in the phpdocr directory.  You can do this as your user to install it locally
+for a single user, or as root to install it globally for all users.
 
 You will also need to install phpdocr's dependencies. Outside of a normal ruby
 installation, it needs the 'mechanize' rubygem. It can be obtained through
