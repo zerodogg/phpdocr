@@ -49,7 +49,7 @@ moment.
 =item B<-o, --comments>
 
 php.net has comments associated with most pages. By default phpdocr will
-filter these away, however some times you may want to see them, in that
+filter these away, however sometimes you may want to see them, in that
 case supply --comments and phpdocr will include them in its output.
 
 =item B<-n, --no-cache>
