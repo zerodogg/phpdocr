@@ -2,10 +2,10 @@
 
 Gem::Specification.new do |s|
   s.name = %q{phpdocr}
-  s.version = "0.1"
+  s.version = "0.1.1"
 
   s.authors = ["Eskild Hustvedt"]
-  s.date = %q{2009-09-25}
+  s.date = %q{2009-09-28}
   s.email = %q{code at zerodogg dot org}
   s.files = [ 'phpdocr', 'README', 'COPYING', 'NEWS', 'phpdocr.1' ]
   s.bindir = '.'
