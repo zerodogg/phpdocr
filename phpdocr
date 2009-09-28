@@ -16,7 +16,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Fetch from rubygems if available
-require 'rubygems'
+begin
+	require 'rubygems'
+rescue LoadError
+	puts '(rubygems appears to be missing, will attempt to continue anyway)'
+end
 # Command-line parsing
 require 'getoptlong'
 # To run the prettifier
@@ -26,7 +30,21 @@ require 'tempfile'
 # CGI is used for escaping
 require 'cgi'
 # www-mechanize is used for fetching from HTTP
-require 'mechanize'
+begin
+	require 'mechanize'
+rescue LoadError
+	puts
+	puts 'You appear to be missing the "mechanize" rubygem.'
+	puts 'phpdocr needs this to be able to fetch data from php.net'
+	puts 'Please install the mechanize rubygem using your OS package manager'
+	puts 'or using the "gem" utility.'
+	puts
+	puts 'Package examples:'
+	puts 'Fedora:        yum install rubygem-mechanize'
+	puts 'Debian/Ubuntu: aptitude install libwww-mechanize-ruby'
+	puts 'Generic/all:   gem install mechanize'
+	exit(1)
+end
 # For creating the cache dir if needed
 require 'fileutils'
 # Application version
