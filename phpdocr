@@ -350,7 +350,7 @@ def lookupWeb (name, fetchPattern = true, prevSearch = nil)
 				break
 			end
 			result.concat(line)
-		elsif line =~ /ect1/
+		elsif line =~ /class="refentry"/ || line =~ /<h3\s*class="title">Description/ || line =~ /<div\s*class="refnamediv">/
 			hadFirst = true
 		end
 		if hadUDM
