@@ -1,2 +1,8 @@
+Verison 0.1.1
+- Minor fix to the manpage
+- Better parsing of php.net pages
+- No longer exlicitly requires rubygems, better handling of missing
+	mechanize gem
+
 Version 0.1
 - Initial release

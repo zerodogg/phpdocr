@@ -48,7 +48,7 @@ end
 # For creating the cache dir if needed
 require 'fileutils'
 # Application version
-$version = 0.1
+$version = '0.1.1'
 # Bool, true if we should include the user notes section
 $includeUserNotes = false
 # Verbose mode (true/false)
