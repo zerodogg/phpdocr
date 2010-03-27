@@ -48,7 +48,7 @@ end
 # For creating the cache dir if needed
 require 'fileutils'
 # Application version
-$version = '0.1.1'
+$version = '0.1.2'
 # Bool, true if we should include the user notes section
 $includeUserNotes = false
 # Verbose mode (true/false)
@@ -472,8 +472,11 @@ def lookup(name)
 		result = lookupCache(name)
 	end
 	if !$cache || result == nil
+		print name+": not cached locally, fetching from web..."
+		STDOUT.flush()
 		sourceWasWeb = true
 		result = lookupWeb(name)
+		puts "done"
 	end
 	if result != nil
 		if $cache && sourceWasWeb
