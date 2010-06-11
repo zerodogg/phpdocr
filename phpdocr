@@ -179,7 +179,7 @@ end
 # Fetch a URL and return its contents
 def getURL (url)
 	begin
-		www = WWW::Mechanize.new
+		www = Mechanize.new
 		vputs('Downloading '+url)
 		return www.get(url).body
 	rescue
