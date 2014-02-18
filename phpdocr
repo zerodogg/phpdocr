@@ -420,6 +420,7 @@ end
 
 # Purpose: Prepare the cache dir
 def prepCacheDir (name)
+    name = name.dup
 	cacheDir = ENV['HOME']+'/.phpdocr/'
 	if ! File.directory?(cacheDir)
 		if File.exists?(cacheDir)
